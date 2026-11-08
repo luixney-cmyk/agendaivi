@@ -3,17 +3,17 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Agenda Diaria | Senadora Ivideliza Reyes</title>
+  <title>Agenda Privada | Senadora Ivideliza Reyes</title>
 
-  <!-- 1. Tailwind CSS (Para que NO pierda nada del diseño ni colores) -->
+  <!-- 1. Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
 
-  <!-- 2. Fuente Inter + Montserrat para que luzca idéntico al póster -->
+  <!-- 2. Fuente Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
 
-  <!-- 3. Leaflet Maps (Mapa interactivo de rutas sin necesidad de pagar API Key) -->
+  <!-- 3. Leaflet Maps -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
@@ -28,130 +28,141 @@
     }
     .leaflet-container {
       z-index: 10 !important;
+      width: 100%;
+      height: 240px;
     }
   </style>
 </head>
 <body class="min-h-screen flex flex-col justify-between bg-[#F4F9FD] text-[#08336E]">
 
   <!-- ==========================================
-       ENCABEZADO OFICIAL (COLORES DEL PÓSTER)
+       PANTALLA DE BLOQUEO (SI NO HA INICIADO SESIÓN)
+  =========================================== -->
+  <div id="loginScreen" class="fixed inset-0 z-50 bg-[#08336E]/95 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-8 shadow-2xl border-4 border-[#E90C63] text-center space-y-6">
+      <div class="w-16 h-16 rounded-2xl bg-[#08336E] text-[#E90C63] flex flex-col items-center justify-center mx-auto border-2 border-[#00A4E4] shadow">
+        <span class="text-2xl font-black leading-none">2DO</span>
+        <span class="text-[9px] font-bold tracking-widest uppercase mt-0.5 text-white">INFORME</span>
+      </div>
+
+      <div class="space-y-2">
+        <span class="text-[11px] font-black uppercase tracking-wider text-[#00A4E4] block">
+          ACCESO RESTRINGIDO AL EQUIPO
+        </span>
+        <h2 class="text-2xl font-black text-[#08336E] uppercase leading-tight">
+          AGENDA <span class="text-[#E90C63]">IVIDELIZA REYES</span>
+        </h2>
+        <p class="text-xs text-gray-600 font-medium">
+          Esta plataforma es exclusiva para el equipo de trabajo y colaboradores autorizados. Inicia sesión con tu cuenta de Google.
+        </p>
+      </div>
+
+      <button onclick="loginWithGoogle()" class="w-full py-4 rounded-2xl bg-[#08336E] hover:bg-[#05234d] text-white font-black text-sm flex items-center justify-center gap-3 shadow-lg transition-all">
+        <svg class="w-5 h-5 bg-white rounded-full p-0.5" viewBox="0 0 24 24">
+          <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"/>
+          <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.19v3.15C3.17 21.36 7.24 24 12 24z"/>
+          <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.19C.43 8.11 0 9.8 0 12s.43 3.89 1.19 5.42l4.09-3.15z"/>
+          <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.24 0 3.17 2.64 1.19 6.58l4.09 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+        </svg>
+        Iniciar Sesión con Cuenta de Google
+      </button>
+
+      <div id="loginErrorMsg" class="text-xs font-bold text-red-600 hidden p-3 rounded-xl bg-red-50 border border-red-200"></div>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       ENCABEZADO OFICIAL
   =========================================== -->
   <header class="bg-white border-b-4 border-[#E90C63] shadow-sm sticky top-0 z-40">
     <div class="h-2.5 w-full bg-gradient-to-r from-[#08336E] via-[#E90C63] to-[#00A4E4]"></div>
     <div class="max-w-3xl mx-auto px-4 py-3.5 flex items-center justify-between gap-3">
       <div class="flex items-center gap-3">
-        <div class="w-14 h-14 rounded-2xl bg-[#08336E] text-white flex flex-col items-center justify-center shrink-0 border-2 border-[#00A4E4] shadow">
-          <span class="text-xl font-black text-[#E90C63] leading-none">2DO</span>
-          <span class="text-[9px] font-bold tracking-widest uppercase mt-0.5">INFORME</span>
+        <div class="w-12 h-12 rounded-2xl bg-[#08336E] text-white flex flex-col items-center justify-center shrink-0 border-2 border-[#00A4E4] shadow">
+          <span class="text-lg font-black text-[#E90C63] leading-none">2DO</span>
+          <span class="text-[8px] font-bold tracking-widest uppercase">INFORME</span>
         </div>
         <div>
-          <span class="text-[11px] font-black uppercase tracking-wider text-[#00A4E4] block">
+          <span class="text-[10px] font-black uppercase tracking-wider text-[#00A4E4] block">
             AGENDA DIARIA DE RECORRIDOS Y REUNIONES
           </span>
-          <h1 class="text-xl sm:text-2xl font-black text-[#08336E] uppercase leading-tight">
+          <h1 class="text-lg sm:text-xl font-black text-[#08336E] uppercase leading-tight">
             SENADORA <span class="text-[#E90C63]">IVIDELIZA REYES</span>
           </h1>
         </div>
       </div>
 
-      <!-- Indicador cuando estás en modo Administradora -->
-      <div id="adminBadge" class="hidden">
-        <button onclick="switchView('public')" class="px-3.5 py-2 rounded-xl bg-[#E90C63] text-white font-black text-xs flex items-center gap-1.5 shadow">
-          ← Volver a Vista Pública
+      <!-- Datos del usuario conectado y botón cerrar sesión -->
+      <div class="flex items-center gap-2">
+        <div class="hidden sm:block text-right">
+          <span id="userNameLabel" class="text-xs font-black block text-[#08336E]">Colaborador</span>
+          <span id="userRoleBadge" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-100 text-[#08336E]">Cargando...</span>
+        </div>
+        <button onclick="logoutGoogle()" title="Cerrar sesión" class="p-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-[#08336E] font-bold text-xs flex items-center gap-1">
+          🚪 <span class="hidden md:inline">Salir</span>
         </button>
       </div>
     </div>
   </header>
 
   <!-- ==========================================
-       VISTA 1: PÁGINA PRINCIPAL (SOLO LECTURA)
+       CONTENIDO PRINCIPAL (VISTA Y EDITOR)
   =========================================== -->
-  <main id="publicView" class="flex-1 max-w-3xl w-full mx-auto px-4 py-5 space-y-6">
+  <main class="flex-1 max-w-3xl w-full mx-auto px-4 py-5 space-y-6">
     
-    <!-- NAVEGADOR DE FECHAS (DÍA ATRÁS / HOY / DÍA ADELANTE) -->
-    <div class="bg-white rounded-3xl p-4 shadow-md border-2 border-[#00A4E4]/30">
-      <div class="flex items-center justify-between gap-2">
-        <button onclick="changeDay(-1)" class="px-3.5 py-3 rounded-2xl bg-[#08336E] active:scale-95 text-white font-black text-xs sm:text-sm flex items-center gap-1 shadow">
-          <i data-lucide="chevron-left" class="w-5 h-5"></i>
-          <span>Día Atrás</span>
-        </button>
-
-        <div class="text-center">
-          <div id="todayBadgeContainer"></div>
-          <h2 id="currentDateLabel" class="text-lg sm:text-2xl font-black text-[#08336E] capitalize mt-1">
-            Cargando fecha...
-          </h2>
-        </div>
-
-        <button onclick="changeDay(1)" class="px-3.5 py-3 rounded-2xl bg-[#08336E] active:scale-95 text-white font-black text-xs sm:text-sm flex items-center gap-1 shadow">
-          <span>Día Adelante</span>
-          <i data-lucide="chevron-right" class="w-5 h-5"></i>
-        </button>
-      </div>
+    <!-- PESTAÑAS DE NAVEGACIÓN (VISUALIZAR / EDITAR) -->
+    <div id="tabsHeader" class="hidden grid grid-cols-2 gap-2 bg-white p-2 rounded-2xl shadow-sm border border-gray-200">
+      <button id="tabPublicBtn" onclick="switchMainTab('public')" class="py-2.5 rounded-xl font-black text-xs sm:text-sm bg-[#08336E] text-white transition-all">
+        📅 Ver Agenda Diaria
+      </button>
+      <button id="tabAdminBtn" onclick="switchMainTab('admin')" class="py-2.5 rounded-xl font-black text-xs sm:text-sm bg-gray-100 text-gray-600 transition-all">
+        ✏️ Alimentar / Modificar Agenda
+      </button>
     </div>
 
-    <!-- CONTENEDOR DINÁMICO DE CAMINATAS Y REUNIONES -->
-    <div id="eventsContainer" class="space-y-8"></div>
-
-  </main>
-
-  <!-- ==========================================
-       VISTA 2: PÁGINA PRIVADA DE EDICIÓN
-  =========================================== -->
-  <section id="adminView" class="hidden flex-1 max-w-3xl w-full mx-auto px-4 py-6 space-y-6">
-    
-    <!-- Bloque de Acceso con Cuenta de Google -->
-    <div id="googleLoginBox" class="bg-white rounded-3xl p-6 shadow-md border-2 border-[#08336E]/15 text-center space-y-4">
-      <div class="w-14 h-14 rounded-2xl bg-[#E90C63]/10 text-[#E90C63] flex items-center justify-center mx-auto">
-        <i data-lucide="lock" class="w-7 h-7"></i>
-      </div>
-      <h2 class="text-xl font-black text-[#08336E]">Acceso Exclusivo de Edición</h2>
-      <p class="text-xs sm:text-sm text-gray-600 max-w-md mx-auto">
-        Inicia sesión con tu cuenta de Google autorizada para agregar o modificar las caminatas y reuniones de la Senadora.
-      </p>
-      <div class="flex flex-col sm:flex-row justify-center gap-3 pt-2">
-        <button onclick="loginWithGoogle()" class="px-6 py-3.5 rounded-2xl bg-[#08336E] hover:bg-[#05234d] text-white font-black text-sm flex items-center justify-center gap-2 shadow-md">
-          Iniciar Sesión con Google
-        </button>
-        <button id="demoBtn" onclick="unlockDemoEditor()" class="px-5 py-3.5 rounded-2xl bg-gray-100 hover:bg-gray-200 text-[#08336E] font-bold text-xs">
-          Probar vista Master (Modo Local)
-        </button>
-      </div>
-      <p id="loginErrorMsg" class="text-xs font-bold text-red-600 hidden"></p>
-    </div>
-
-    <!-- Panel Editor (Visible cuando ya inició sesión con Google) -->
-    <div id="editorFormBox" class="hidden space-y-6">
-      <div class="bg-[#08336E] text-white p-4 rounded-2xl flex flex-wrap items-center justify-between gap-2">
-        <div>
-          <span class="text-[11px] font-black uppercase text-[#00A4E4]" id="loggedEmailLabel">MODO ADMINISTRADOR</span>
-          <h2 class="text-lg font-black">Panel de Control de Agenda</h2>
-        </div>
-        <div class="flex items-center gap-2">
-          <button onclick="logoutGoogle()" class="px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs">
-            Cerrar sesión
+    <!-- SECCIÓN 1: VISTA PÚBLICA / EQUIPO -->
+    <div id="publicSection" class="space-y-6">
+      <!-- NAVEGADOR DE FECHAS -->
+      <div class="bg-white rounded-3xl p-4 shadow-md border-2 border-[#00A4E4]/30">
+        <div class="flex items-center justify-between gap-2">
+          <button onclick="changeDay(-1)" class="px-3.5 py-3 rounded-2xl bg-[#08336E] active:scale-95 text-white font-black text-xs sm:text-sm flex items-center gap-1 shadow">
+            <i data-lucide="chevron-left" class="w-5 h-5"></i>
+            <span>Día Atrás</span>
           </button>
-          <button onclick="switchView('public')" class="px-4 py-2 rounded-xl bg-[#E90C63] text-white font-black text-xs">
-            Ver Página Pública
+
+          <div class="text-center">
+            <div id="todayBadgeContainer"></div>
+            <h2 id="currentDateLabel" class="text-lg sm:text-2xl font-black text-[#08336E] capitalize mt-1">
+              Cargando fecha...
+            </h2>
+          </div>
+
+          <button onclick="changeDay(1)" class="px-3.5 py-3 rounded-2xl bg-[#08336E] active:scale-95 text-white font-black text-xs sm:text-sm flex items-center gap-1 shadow">
+            <span>Día Adelante</span>
+            <i data-lucide="chevron-right" class="w-5 h-5"></i>
           </button>
         </div>
       </div>
 
-      <!-- =========================================================
-           EXCLUSIVO PARA TI (luixnay@gmail.com): GESTIÓN DE ACCESOS
-           Los editores normales NUNCA verán este bloque
-      ========================================================== -->
-      <div id="masterAccessBox" class="hidden bg-white p-5 rounded-3xl shadow-md border-2 border-[#E90C63] space-y-4">
+      <!-- CONTENEDOR DE EVENTOS -->
+      <div id="eventsContainer" class="space-y-8"></div>
+    </div>
+
+    <!-- SECCIÓN 2: PANEL DE EDICIÓN Y MASTER -->
+    <div id="adminSection" class="hidden space-y-6">
+      
+      <!-- CUADRO EXCLUSIVO MASTER (SOLO luixnay@gmail.com) -->
+      <div id="masterControlBox" class="hidden bg-white p-5 rounded-3xl shadow-md border-2 border-[#E90C63] space-y-4">
         <div class="flex items-center justify-between">
           <div>
             <span class="px-2.5 py-0.5 rounded-full bg-[#E90C63] text-white font-black text-[10px] uppercase">
-              👑 EXCLUSIVO MASTER (luixnay@gmail.com)
+              👑 PANEL MASTER (luixnay@gmail.com)
             </span>
             <h3 class="font-black text-base text-[#08336E] mt-1">
-              Control de Permisos con Cuenta de Google
+              Control de Accesos del Equipo
             </h3>
             <p class="text-xs text-gray-500">
-              Solo tú puedes ver este cuadro y decidir quién puede editar la agenda.
+              Agrega los correos Gmail de quienes deseas que entren a ver o editar la agenda.
             </p>
           </div>
         </div>
@@ -159,8 +170,8 @@
         <form onsubmit="addAuthorizedUser(event)" class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-1">
           <input id="newAuthEmail" type="email" required placeholder="correo@gmail.com" class="px-3.5 py-2.5 rounded-xl border font-bold text-xs sm:text-sm" />
           <select id="newAuthRole" class="px-3.5 py-2.5 rounded-xl border font-bold text-xs sm:text-sm bg-white">
-            <option value="editor">✏️ Editor de Agenda (Puede subir caminatas/reuniones)</option>
-            <option value="viewer">👁️ Solo Visualizador (Sin permiso de editar)</option>
+            <option value="editor">✏️ Editor (Puede crear/borrar)</option>
+            <option value="viewer">👁️ Visualizador (Solo lectura)</option>
           </select>
           <button type="submit" class="py-2.5 px-4 rounded-xl bg-[#08336E] hover:bg-[#05234d] text-white font-black text-xs shadow">
             + Dar Acceso Google
@@ -168,82 +179,82 @@
         </form>
 
         <div class="space-y-2 pt-2">
-          <span class="text-[11px] font-black uppercase text-gray-500 block">Cuentas registradas y su nivel de acceso:</span>
+          <span class="text-[11px] font-black uppercase text-gray-500 block">Cuentas con acceso registrado:</span>
           <div id="authorizedUsersList" class="space-y-2"></div>
         </div>
       </div>
 
-      <!-- Selector de Fecha en el Editor -->
-      <div class="bg-white p-4 rounded-2xl shadow flex items-center justify-between">
-        <button onclick="changeDay(-1)" class="px-3 py-2 bg-gray-100 rounded-xl font-bold text-xs">← Día Atrás</button>
-        <div class="text-center">
-          <span class="text-xs text-gray-500 font-bold block">Editando actividades del día:</span>
-          <strong id="adminDateLabel" class="text-base capitalize"></strong>
-        </div>
-        <button onclick="changeDay(1)" class="px-3 py-2 bg-gray-100 rounded-xl font-bold text-xs">Día Adelante →</button>
-      </div>
-
-      <!-- Formulario para Agregar Caminata o Reunión -->
-      <form onsubmit="saveActivity(event)" class="bg-white p-5 rounded-3xl shadow-md space-y-4 border-2 border-[#08336E]/10">
-        <h3 class="font-black text-base text-[#E90C63] uppercase">+ Agregar Actividad a este día</h3>
-
-        <div id="saveAlert" class="hidden p-3 rounded-xl bg-emerald-100 text-emerald-800 font-bold text-xs">
-          ¡Actividad guardada correctamente! Ya se ve en la página principal.
+      <!-- FORMULARIO PARA AGREGAR CAMINATA O REUNIÓN -->
+      <div id="editorFormContainer" class="space-y-6">
+        <div class="bg-white p-4 rounded-2xl shadow flex items-center justify-between">
+          <button onclick="changeDay(-1)" class="px-3 py-2 bg-gray-100 rounded-xl font-bold text-xs">← Día Atrás</button>
+          <div class="text-center">
+            <span class="text-xs text-gray-500 font-bold block">Editando actividades del día:</span>
+            <strong id="adminDateLabel" class="text-base capitalize"></strong>
+          </div>
+          <button onclick="changeDay(1)" class="px-3 py-2 bg-gray-100 rounded-xl font-bold text-xs">Día Adelante →</button>
         </div>
 
-        <div class="grid grid-cols-2 gap-3">
-          <button type="button" id="btnTypeWalk" onclick="setActivityType('caminata')" class="py-3 rounded-xl font-black text-xs border-2 bg-[#08336E] text-white border-[#08336E]">
-            👣 1. Es Caminata
-          </button>
-          <button type="button" id="btnTypeMeet" onclick="setActivityType('reunion')" class="py-3 rounded-xl font-black text-xs border-2 bg-gray-50 text-gray-600 border-gray-200">
-            👥 2. Es Reunión
-          </button>
-        </div>
+        <form onsubmit="saveActivity(event)" class="bg-white p-5 rounded-3xl shadow-md space-y-4 border-2 border-[#08336E]/10">
+          <h3 class="font-black text-base text-[#E90C63] uppercase">+ Registrar Actividad en esta Fecha</h3>
 
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <input id="inpTime" type="text" required value="09:30 AM" placeholder="Hora (ej. 09:30 AM)" class="px-3.5 py-2.5 rounded-xl border font-bold text-sm" />
-          <input id="inpTitle" type="text" required placeholder="Título de la Caminata o Reunión *" class="sm:col-span-2 px-3.5 py-2.5 rounded-xl border font-bold text-sm" />
-        </div>
+          <div id="saveAlert" class="hidden p-3 rounded-xl bg-emerald-100 text-emerald-800 font-bold text-xs">
+            ¡Actividad guardada correctamente en la base de datos!
+          </div>
 
-        <input id="inpLocation" type="text" required placeholder="¿Dónde inicia el punto de recorrido? *" class="w-full px-3.5 py-2.5 rounded-xl border font-bold text-sm" />
-
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <input id="inpHost" type="text" placeholder="¿Quién es el Anfitrión?" class="hidden px-3.5 py-2.5 rounded-xl border text-sm font-semibold" />
-          <input id="inpResp" type="text" placeholder="¿Quién es el Responsable?" class="px-3.5 py-2.5 rounded-xl border text-sm font-semibold" />
-          <input id="inpPhone" type="text" placeholder="Teléfono del Responsable" class="px-3.5 py-2.5 rounded-xl border text-sm font-semibold" />
-        </div>
-
-        <div id="walkStepsWrapper">
-          <textarea id="inpSteps" rows="3" placeholder="Escribe los pasos de la caminata (un paso por renglón)..." class="w-full p-3 rounded-xl border text-sm font-semibold"></textarea>
-        </div>
-
-        <textarea id="inpReqs" rows="2" placeholder="Escribe los requerimientos que necesita (uno por renglón: Sillas, Sonido, Agua...)" class="w-full p-3 rounded-xl border text-sm font-semibold"></textarea>
-
-        <!-- Mapa para trazar la ruta haciendo clic -->
-        <div class="space-y-1.5">
-          <div class="flex items-center justify-between">
-            <span class="text-xs font-black">
-              📍 Haz clic en el mapa para marcar el inicio y por dónde van a caminar (<span id="pointsCount">1</span> puntos):
-            </span>
-            <button type="button" onclick="clearAdminMapPoints()" class="text-xs text-red-600 font-bold underline">
-              Borrar puntos del mapa
+          <div class="grid grid-cols-2 gap-3">
+            <button type="button" id="btnTypeWalk" onclick="setActivityType('caminata')" class="py-3 rounded-xl font-black text-xs border-2 bg-[#08336E] text-white border-[#08336E]">
+              👣 Es Caminata
+            </button>
+            <button type="button" id="btnTypeMeet" onclick="setActivityType('reunion')" class="py-3 rounded-xl font-black text-xs border-2 bg-gray-50 text-gray-600 border-gray-200">
+              👥 Es Reunión
             </button>
           </div>
-          <div id="adminMapCanvas" class="h-56 w-full rounded-2xl border-2 border-[#08336E]/20"></div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <input id="inpTime" type="text" required value="09:30 AM" placeholder="Hora (ej. 09:30 AM)" class="px-3.5 py-2.5 rounded-xl border font-bold text-sm" />
+            <input id="inpTitle" type="text" required placeholder="Título de la Caminata o Reunión *" class="sm:col-span-2 px-3.5 py-2.5 rounded-xl border font-bold text-sm" />
+          </div>
+
+          <input id="inpLocation" type="text" required placeholder="¿Dónde inicia el punto de recorrido o reunión? *" class="w-full px-3.5 py-2.5 rounded-xl border font-bold text-sm" />
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <input id="inpHost" type="text" placeholder="¿Quién es el Anfitrión?" class="hidden px-3.5 py-2.5 rounded-xl border text-sm font-semibold" />
+            <input id="inpResp" type="text" placeholder="¿Quién es el Responsable?" class="px-3.5 py-2.5 rounded-xl border text-sm font-semibold" />
+            <input id="inpPhone" type="text" placeholder="Teléfono del Responsable" class="px-3.5 py-2.5 rounded-xl border text-sm font-semibold" />
+          </div>
+
+          <div id="walkStepsWrapper">
+            <textarea id="inpSteps" rows="3" placeholder="Escribe los pasos de la caminata (un paso por renglón)..." class="w-full p-3 rounded-xl border text-sm font-semibold"></textarea>
+          </div>
+
+          <textarea id="inpReqs" rows="2" placeholder="Requerimientos necesarios (uno por renglón: Sillas, Sonido, Agua...)" class="w-full p-3 rounded-xl border text-sm font-semibold"></textarea>
+
+          <div class="space-y-1.5">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-black">
+                📍 Haz clic en el mapa para marcar la ruta (<span id="pointsCount">1</span> puntos):
+              </span>
+              <button type="button" onclick="clearAdminMapPoints()" class="text-xs text-red-600 font-bold underline">
+                Borrar puntos
+              </button>
+            </div>
+            <div id="adminMapCanvas" class="h-56 w-full rounded-2xl border-2 border-[#08336E]/25"></div>
+          </div>
+
+          <button type="submit" class="w-full py-3.5 rounded-2xl bg-[#E90C63] hover:bg-[#c80953] text-white font-black text-sm shadow-md">
+            GUARDAR ACTIVIDAD EN LA AGENDA
+          </button>
+        </form>
+
+        <div class="bg-white p-5 rounded-3xl shadow space-y-3">
+          <h3 class="font-black text-sm uppercase">Actividades registradas en esta fecha (para borrar si se requiere)</h3>
+          <div id="adminEventsList" class="space-y-2"></div>
         </div>
-
-        <button type="submit" class="w-full py-3.5 rounded-2xl bg-[#E90C63] hover:bg-[#c80953] text-white font-black text-sm shadow-md">
-          GUARDAR ACTIVIDAD EN LA AGENDA
-        </button>
-      </form>
-
-      <!-- Lista para borrar actividades del día -->
-      <div class="bg-white p-5 rounded-3xl shadow space-y-3">
-        <h3 class="font-black text-sm uppercase">Actividades cargadas en esta fecha</h3>
-        <div id="adminEventsList" class="space-y-2"></div>
       </div>
     </div>
-  </section>
+
+  </main>
 
   <!-- ==========================================
        PIE DE PÁGINA
@@ -251,23 +262,19 @@
   <footer class="mt-10 bg-[#08336E] text-white border-t-4 border-[#00A4E4] py-5 px-4">
     <div class="max-w-3xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
       <div class="text-center sm:text-left">
-        <p class="font-black text-sm text-white">SENADORA IVIDELIZA REYES • AGENDA DE EQUIPO</p>
+        <p class="font-black text-sm text-white">SENADORA IVIDELIZA REYES • AGENDA PRIVADA DE EQUIPO</p>
       </div>
-      <button onclick="switchView('admin')" class="px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-blue-100 font-bold flex items-center gap-1.5 transition-all">
-        🔒 Ir a Página de Edición (Administradora)
-      </button>
+      <span class="text-blue-200">Sincronización en tiempo real en la nube</span>
     </div>
   </footer>
 
   <!-- ==========================================
-       LÓGICA DE LA APLICACIÓN Y FIREBASE
+       LÓGICA JAVASCRIPT CON FIREBASE Y LEAFLET
   =========================================== -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
     import { 
       getAuth, 
-      signInAnonymously, 
-      signInWithCustomToken, 
       onAuthStateChanged,
       GoogleAuthProvider,
       signInWithPopup,
@@ -283,14 +290,8 @@
       onSnapshot 
     } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-    // =========================================================================
-    // 1. ADMINISTRADOR MASTER ÚNICO (SOLO TÚ PUEDES DAR O QUITAR PERMISOS)
-    // =========================================================================
     const MASTER_ADMIN_EMAIL = "luixnay@gmail.com";
 
-    // =========================================================================
-    // 2. TUS CREDENCIALES REALES DE FIREBASE (PROYECTO: agenda-ivi)
-    // =========================================================================
     const YOUR_FIREBASE_CONFIG = {
       apiKey: "AIzaSyDyczgVybzvj31cpO6YreZNw9Ywi3ODFFw",
       authDomain: "agenda-ivi.firebaseapp.com",
@@ -308,7 +309,6 @@
       return `${yyyy}-${mm}-${dd}`;
     };
 
-    // Datos iniciales de muestra
     const INITIAL_EVENTS = [
       {
         id: 'demo-1',
@@ -322,355 +322,261 @@
         steps: [
           'Nos reunimos en la esquina norte del Parque Juan Escutia.',
           'Caminamos por Av. México hacia el norte.',
-          'Doblamos a la derecha en Calle Zaragoza (4 cuadras).',
-          'Terminamos en la Plazuela Principal.'
+          'Doblamos a la derecha en Calle Zaragoza (4 cuadras).'
         ],
         routePoints: [
           { lat: 21.5039, lng: -104.8948, label: '1. Inicio: Parque Juan Escutia' },
           { lat: 21.5065, lng: -104.8942, label: '2. Av. México e Hidalgo' },
-          { lat: 21.5089, lng: -104.8935, label: '3. Catedral de Tepic' },
-          { lat: 21.5085, lng: -104.8905, label: '4. Fin: Plazuela Zaragoza' }
+          { lat: 21.5089, lng: -104.8935, label: '3. Catedral de Tepic' }
         ],
-        requirements: ['Periódicos del Informe', 'Agua para brigada', 'Banderines']
-      },
-      {
-        id: 'demo-2',
-        date: getTodayStr(),
-        type: 'reunion',
-        title: 'Reunión Vecinal en Bellavista',
-        timeStart: '04:00 PM',
-        locationName: 'Ex Fábrica Textil de Bellavista, Tepic',
-        host: 'Sra. María Elena Gómez',
-        responsible: 'Ing. Carlos Ramírez',
-        responsiblePhone: '311 987 6543',
-        routePoints: [
-          { lat: 21.5619, lng: -104.8847, label: 'Lugar: Ex Fábrica de Bellavista' }
-        ],
-        requirements: [
-          '150 Sillas',
-          'Sonido con 2 micrófonos',
-          'Lona del 2do Informe',
-          'Toldo 10x10m'
-        ]
+        requirements: ['Periódicos del Informe', 'Agua para brigada']
       }
     ];
 
-    // Estado global
     let selectedDate = getTodayStr();
     let allEvents = [...INITIAL_EVENTS];
-    let authorizedAccounts = [
-      { email: MASTER_ADMIN_EMAIL, role: 'master' }
-    ];
+    let authorizedAccounts = [{ email: MASTER_ADMIN_EMAIL, role: 'master' }];
     let currentActivityType = 'caminata';
     let adminRoutePoints = [{ lat: 21.5055, lng: -104.8945, label: 'Punto 1' }];
     let adminMap = null;
-    let publicWalkMaps = [];
-    let renderMapTimer = null;
+    let publicMapsInstances = [];
     let db = null;
     let auth = null;
     let currentUser = null;
-    let currentUserRole = null; // 'master' | 'editor' | 'viewer' | null
+    let currentUserRole = null;
+    let currentMainTab = 'public';
     const appId = typeof __app_id !== 'undefined' ? __app_id : 'agenda-ivideliza';
-    const isCanvasEnv = typeof __firebase_config !== 'undefined';
-    const isCustomFirebaseConfigured = YOUR_FIREBASE_CONFIG.apiKey !== "REEMPLAZAR_CON_TU_API_KEY";
 
-    // Inicializar Firebase si está configurado
-    if (isCanvasEnv || isCustomFirebaseConfigured) {
-      try {
-        const cfg = isCanvasEnv ? JSON.parse(__firebase_config) : YOUR_FIREBASE_CONFIG;
-        const app = initializeApp(cfg);
-        auth = getAuth(app);
-        db = getFirestore(app);
+    try {
+      const app = initializeApp(YOUR_FIREBASE_CONFIG);
+      auth = getAuth(app);
+      db = getFirestore(app);
 
-        if (isCustomFirebaseConfigured) {
-          const demoBtn = document.getElementById('demoBtn');
-          if (demoBtn) demoBtn.classList.add('hidden');
+      onAuthStateChanged(auth, (user) => {
+        currentUser = user;
+        if (user && user.email) {
+          verifyUserAccessAndLoad(user);
+        } else {
+          showLoginScreen("Inicia sesión con tu cuenta de Google autorizada.");
         }
+      });
+    } catch (e) {
+      console.error("Error Firebase:", e);
+    }
 
-        const initAuth = async () => {
-          if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-            await signInWithCustomToken(auth, __initial_auth_token);
-          } else if (!auth.currentUser) {
-            await signInAnonymously(auth);
-          }
-        };
-        initAuth();
-
-        onAuthStateChanged(auth, (user) => {
-          currentUser = user;
-          if (user) {
-            // 1. Escuchar eventos de la agenda en tiempo real
-            const eventsRef = collection(db, 'artifacts', appId, 'public', 'data', 'agenda_events');
-            onSnapshot(eventsRef, async (snap) => {
-              const list = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-              if (list.length === 0) {
-                for (const item of INITIAL_EVENTS) {
-                  const { id, ...cleanItem } = item;
-                  await addDoc(eventsRef, cleanItem);
-                }
-              } else {
-                allEvents = list;
-                renderAll();
-              }
-            }, (err) => console.error(err));
-
-            // 2. Escuchar la lista de correos con permiso que tú administras
-            const permsRef = collection(db, 'artifacts', appId, 'public', 'data', 'agenda_permissions');
-            onSnapshot(permsRef, (snap) => {
-              const list = snap.docs.map(d => ({ email: d.id.toLowerCase(), ...d.data() }));
-              if (!list.some(u => u.email === MASTER_ADMIN_EMAIL)) {
-                list.unshift({ email: MASTER_ADMIN_EMAIL, role: 'master' });
-              }
-              authorizedAccounts = list;
-              checkCurrentGoogleUserRole(user);
-              renderAuthorizedUsersList();
-            }, (err) => console.error(err));
-          }
-        });
-      } catch (e) {
-        console.warn("Usando modo demostración local hasta configurar Firebase:", e);
+    function showLoginScreen(msg) {
+      document.getElementById('loginScreen').classList.remove('flex');
+      document.getElementById('loginScreen').classList.add('flex');
+      if (msg) {
+        const errBox = document.getElementById('loginErrorMsg');
+        errBox.textContent = msg;
+        errBox.classList.remove('hidden');
       }
     }
 
-    function checkCurrentGoogleUserRole(user) {
-      if (!user || !user.email) return;
+    function hideLoginScreen() {
+      document.getElementById('loginScreen').classList.remove('flex');
+      document.getElementById('loginScreen').classList.add('hidden');
+    }
+
+    window.loginWithGoogle = async () => {
+      try {
+        const provider = new GoogleAuthProvider();
+        const result = await signInWithPopup(auth, provider);
+        verifyUserAccessAndLoad(result.user);
+      } catch (err) {
+        showLoginScreen("Error al iniciar sesión con Google. Inténtalo de nuevo.");
+      }
+    };
+
+    window.logoutGoogle = async () => {
+      if (auth) await signOut(auth);
+      currentUserRole = null;
+      showLoginScreen("Has cerrado sesión.");
+    };
+
+    function verifyUserAccessAndLoad(user) {
       const email = user.email.toLowerCase().trim();
-      if (email === MASTER_ADMIN_EMAIL) {
-        currentUserRole = 'master';
-        applyEditorPermissionsUI(email, 'master');
-        return;
-      }
-      const found = authorizedAccounts.find(acc => acc.email.toLowerCase() === email);
-      if (found && found.role === 'editor') {
-        currentUserRole = 'editor';
-        applyEditorPermissionsUI(email, 'editor');
-      } else if (found && found.role === 'viewer') {
-        currentUserRole = 'viewer';
-        showLoginError(`Hola ${email}: Tu cuenta está registrada como Solo Visualizador. Puedes ver toda la agenda pública pero no modificarla.`);
-      } else {
-        currentUserRole = null;
-        showLoginError(`El correo ${email} no tiene permiso para editar. Solicita acceso al Administrador Master (${MASTER_ADMIN_EMAIL}).`);
-      }
+      
+      // 1. Escuchar la lista de permisos desde Firestore
+      const permsRef = collection(db, 'artifacts', appId, 'public', 'data', 'agenda_permissions');
+      onSnapshot(permsRef, (snap) => {
+        const list = snap.docs.map(d => ({ email: d.id.toLowerCase(), ...d.data() }));
+        if (!list.some(u => u.email === MASTER_ADMIN_EMAIL)) {
+          list.unshift({ email: MASTER_ADMIN_EMAIL, role: 'master' });
+        }
+        authorizedAccounts = list;
+        renderAuthorizedUsersList();
+
+        // Evaluar rol del usuario actual
+        if (email === MASTER_ADMIN_EMAIL) {
+          currentUserRole = 'master';
+          grantAccessUI(email, 'Master (Administrador General)');
+        } else {
+          const found = authorizedAccounts.find(acc => acc.email === email);
+          if (found && found.role === 'editor') {
+            currentUserRole = 'editor';
+            grantAccessUI(email, 'Editor de Agenda');
+          } else if (found && found.role === 'viewer') {
+            currentUserRole = 'viewer';
+            grantAccessUI(email, 'Visualizador');
+          } else {
+            showLoginScreen(`El correo ${email} no tiene permisos de acceso. Solicita acceso a ${MASTER_ADMIN_EMAIL}.`);
+            signOut(auth);
+          }
+        }
+      }, (err) => console.error(err));
+
+      // 2. Escuchar la agenda
+      const eventsRef = collection(db, 'artifacts', appId, 'public', 'data', 'agenda_events');
+      onSnapshot(eventsRef, async (snap) => {
+        const list = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        if (list.length === 0) {
+          for (const item of INITIAL_EVENTS) {
+            const { id, ...clean } = item;
+            await addDoc(eventsRef, clean);
+          }
+        } else {
+          allEvents = list;
+          renderAll();
+        }
+      });
     }
 
-    function showLoginError(text) {
-      document.getElementById('googleLoginBox').classList.remove('hidden');
-      document.getElementById('editorFormBox').classList.add('hidden');
-      const msg = document.getElementById('loginErrorMsg');
-      msg.textContent = text;
-      msg.classList.remove('hidden');
-    }
+    function grantAccessUI(email, roleName) {
+      hideLoginScreen();
+      document.getElementById('userNameLabel').textContent = email;
+      document.getElementById('userRoleBadge').textContent = roleName;
 
-    function applyEditorPermissionsUI(email, role) {
-      document.getElementById('googleLoginBox').classList.add('hidden');
-      document.getElementById('editorFormBox').classList.remove('hidden');
-      const masterBox = document.getElementById('masterAccessBox');
+      const tabsHeader = document.getElementById('tabsHeader');
+      const masterBox = document.getElementById('masterControlBox');
+      const editorForm = document.getElementById('editorFormContainer');
 
-      if (role === 'master') {
-        document.getElementById('loggedEmailLabel').textContent = `👑 ADMIN MASTER: ${email}`;
+      if (currentUserRole === 'master') {
+        tabsHeader.classList.remove('hidden');
         masterBox.classList.remove('hidden');
-      } else {
-        document.getElementById('loggedEmailLabel').textContent = `✏️ EDITOR AUTORIZADO: ${email}`;
+        editorForm.classList.remove('hidden');
+      } else if (currentUserRole === 'editor') {
+        tabsHeader.classList.remove('hidden');
         masterBox.classList.add('hidden');
+        editorForm.classList.remove('hidden');
+      } else {
+        // Solo visualizador
+        tabsHeader.classList.add('hidden');
+        masterBox.classList.add('hidden');
+        editorForm.classList.add('hidden');
       }
-      renderAuthorizedUsersList();
-      setTimeout(initAdminMap, 200);
+      renderAll();
     }
 
-    // Agregar o modificar un correo autorizado (Solo Master luixnay@gmail.com)
+    window.switchMainTab = (tab) => {
+      currentMainTab = tab;
+      const pubSec = document.getElementById('publicSection');
+      const admSec = document.getElementById('adminSection');
+      const btnPub = document.getElementById('tabPublicBtn');
+      const admPub = document.getElementById('tabAdminBtn');
+
+      if (tab === 'admin') {
+        pubSec.classList.add('hidden');
+        admSec.classList.remove('hidden');
+        btnPub.className = 'py-2.5 rounded-xl font-black text-xs sm:text-sm bg-gray-100 text-gray-600 transition-all';
+        admPub.className = 'py-2.5 rounded-xl font-black text-xs sm:text-sm bg-[#08336E] text-white transition-all';
+        setTimeout(initAdminMap, 150);
+      } else {
+        admSec.classList.add('hidden');
+        pubSec.classList.remove('hidden');
+        admPub.className = 'py-2.5 rounded-xl font-black text-xs sm:text-sm bg-gray-100 text-gray-600 transition-all';
+        btnPub.className = 'py-2.5 rounded-xl font-black text-xs sm:text-sm bg-[#08336E] text-white transition-all';
+        renderAll();
+      }
+    };
+
     window.addAuthorizedUser = async (e) => {
       e.preventDefault();
       if (currentUserRole !== 'master') return;
-      const emailInput = document.getElementById('newAuthEmail');
-      const roleInput = document.getElementById('newAuthRole');
-      const email = emailInput.value.toLowerCase().trim();
-      const role = roleInput.value;
-
+      const email = document.getElementById('newAuthEmail').value.toLowerCase().trim();
+      const role = document.getElementById('newAuthRole').value;
       if (!email || email === MASTER_ADMIN_EMAIL) return;
 
-      if (db && currentUser) {
-        const userDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'agenda_permissions', email);
-        await setDoc(userDocRef, {
-          email,
-          role,
-          updatedBy: MASTER_ADMIN_EMAIL,
-          updatedAt: new Date().toISOString()
-        });
-      } else {
-        authorizedAccounts = authorizedAccounts.filter(a => a.email !== email);
-        authorizedAccounts.push({ email, role });
-        renderAuthorizedUsersList();
-      }
-      emailInput.value = '';
+      const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'agenda_permissions', email);
+      await setDoc(docRef, { email, role, updatedAt: new Date().toISOString() });
+      document.getElementById('newAuthEmail').value = '';
     };
 
-    // Quitar permiso a un correo (Solo Master luixnay@gmail.com)
     window.removeAuthorizedUser = async (email) => {
       if (currentUserRole !== 'master' || email === MASTER_ADMIN_EMAIL) return;
-      if (db && currentUser) {
-        const userDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'agenda_permissions', email);
-        await deleteDoc(userDocRef);
-      } else {
-        authorizedAccounts = authorizedAccounts.filter(a => a.email !== email);
-        renderAuthorizedUsersList();
-      }
+      await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'agenda_permissions', email));
     };
 
     function renderAuthorizedUsersList() {
       const container = document.getElementById('authorizedUsersList');
       if (!container) return;
       container.innerHTML = authorizedAccounts.map(acc => {
-        const isMaster = acc.email.toLowerCase() === MASTER_ADMIN_EMAIL;
-        const badge = isMaster
-          ? `<span class="px-2.5 py-0.5 rounded-full bg-[#E90C63] text-white font-black text-[10px]">👑 ADMIN MASTER</span>`
-          : acc.role === 'editor'
-            ? `<span class="px-2.5 py-0.5 rounded-full bg-[#00A4E4]/20 text-[#08336E] font-black text-[10px]">✏️ EDITOR DE AGENDA</span>`
-            : `<span class="px-2.5 py-0.5 rounded-full bg-gray-200 text-gray-700 font-bold text-[10px]">👁️ VISUALIZADOR</span>`;
-
+        const isMaster = acc.email === MASTER_ADMIN_EMAIL;
         return `
-          <div class="flex items-center justify-between p-2.5 rounded-xl bg-[#F4F9FD] border border-[#08336E]/10 text-xs">
-            <div class="flex flex-wrap items-center gap-2">
+          <div class="flex items-center justify-between p-2.5 rounded-xl bg-[#F4F9FD] border text-xs">
+            <div>
               <strong class="text-[#08336E]">${acc.email}</strong>
-              ${badge}
+              <span class="ml-2 px-2 py-0.5 rounded-full ${isMaster ? 'bg-[#E90C63] text-white' : 'bg-blue-100 text-[#08336E]'} font-bold text-[10px]">
+                ${isMaster ? '👑 MASTER' : acc.role.toUpperCase()}
+              </span>
             </div>
-            ${!isMaster ? `
-              <button onclick="removeAuthorizedUser('${acc.email}')" class="text-red-600 hover:bg-red-50 px-2.5 py-1 rounded-lg font-bold">
-                Quitar acceso
-              </button>
-            ` : `<span class="text-[10px] font-bold text-gray-400">Control Total</span>`}
+            ${!isMaster ? `<button onclick="removeAuthorizedUser('${acc.email}')" class="text-red-600 font-bold hover:underline">Quitar</button>` : ''}
           </div>
         `;
       }).join('');
     }
 
-    // Formatear fecha en español
-    function formatSimpleDate(dateStr) {
-      const [y, m, d] = dateStr.split('-').map(Number);
-      const dateObj = new Date(y, m - 1, d);
-      return dateObj.toLocaleDateString('es-MX', {
-        weekday: 'long',
-        day: 'numeric',
-        month: 'long'
-      });
-    }
-
-    // Generar link directo de Google Maps (Caminando o Ubicación)
-    function getGoogleMapsUrl(points) {
-      if (!points || points.length === 0) return 'https://www.google.com/maps';
-      if (points.length === 1) {
-        return `https://www.google.com/maps/search/?api=1&query=${points[0].lat},${points[0].lng}`;
-      }
-      const origin = `${points[0].lat},${points[0].lng}`;
-      const destination = `${points[points.length - 1].lat},${points[points.length - 1].lng}`;
-      const waypoints = points.slice(1, -1).map(p => `${p.lat},${p.lng}`).join('|');
-      return `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}${waypoints ? `&waypoints=${waypoints}` : ''}&travelmode=walking`;
-    }
-
-    // Cambiar día atrás o adelante
     window.changeDay = (offset) => {
       const [y, m, d] = selectedDate.split('-').map(Number);
       const dateObj = new Date(y, m - 1, d);
       dateObj.setDate(dateObj.getDate() + offset);
-      const yyyy = dateObj.getFullYear();
-      const mm = String(dateObj.getMonth() + 1).padStart(2, '0');
-      const dd = String(dateObj.getDate()).padStart(2, '0');
-      selectedDate = `${yyyy}-${mm}-${dd}`;
+      selectedDate = dateObj.toISOString().split('T')[0];
       renderAll();
     };
 
-    window.goToday = () => {
-      selectedDate = getTodayStr();
-      renderAll();
-    };
+    function formatSimpleDate(dateStr) {
+      const [y, m, d] = dateStr.split('-').map(Number);
+      return new Date(y, m - 1, d).toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long' });
+    }
 
-    // Cambiar entre Vista Pública y Vista Administradora
-    window.switchView = (view) => {
-      const pub = document.getElementById('publicView');
-      const adm = document.getElementById('adminView');
-      const badge = document.getElementById('adminBadge');
-      if (view === 'admin') {
-        pub.classList.add('hidden');
-        adm.classList.remove('hidden');
-        badge.classList.remove('hidden');
-        setTimeout(initAdminMap, 150);
-      } else {
-        adm.classList.add('hidden');
-        pub.classList.remove('hidden');
-        badge.classList.add('hidden');
-        renderAll();
-      }
-    };
-
-    // Iniciar sesión con Google para editar
-    window.loginWithGoogle = async () => {
-      if (!auth || !isCustomFirebaseConfigured) {
-        unlockDemoEditor();
-        return;
-      }
-      try {
-        const provider = new GoogleAuthProvider();
-        const result = await signInWithPopup(auth, provider);
-        checkCurrentGoogleUserRole(result.user);
-      } catch (err) {
-        showLoginError("No se pudo iniciar sesión con Google. Verifica que tu dominio esté autorizado en Firebase.");
-      }
-    };
-
-    window.logoutGoogle = async () => {
-      if (auth && isCustomFirebaseConfigured) {
-        await signOut(auth);
-        await signInAnonymously(auth);
-      }
-      currentUserRole = null;
-      document.getElementById('editorFormBox').classList.add('hidden');
-      document.getElementById('googleLoginBox').classList.remove('hidden');
-    };
-
-    window.unlockDemoEditor = () => {
-      currentUserRole = 'master';
-      applyEditorPermissionsUI(MASTER_ADMIN_EMAIL, 'master');
-    };
+    function getGoogleMapsUrl(points) {
+      if (!points || points.length === 0) return 'https://www.google.com/maps';
+      if (points.length === 1) return `https://www.google.com/maps/search/?api=1&query=${points[0].lat},${points[0].lng}`;
+      const origin = `${points[0].lat},${points[0].lng}`;
+      const dest = `${points[points.length - 1].lat},${points[points.length - 1].lng}`;
+      const way = points.slice(1, -1).map(p => `${p.lat},${p.lng}`).join('|');
+      return `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${dest}${way ? `&waypoints=${way}` : ''}&travelmode=walking`;
+    }
 
     window.setActivityType = (type) => {
       currentActivityType = type;
-      const btnWalk = document.getElementById('btnTypeWalk');
-      const btnMeet = document.getElementById('btnTypeMeet');
+      const bWalk = document.getElementById('btnTypeWalk');
+      const bMeet = document.getElementById('btnTypeMeet');
       const inpHost = document.getElementById('inpHost');
-      const inpLocation = document.getElementById('inpLocation');
       const walkSteps = document.getElementById('walkStepsWrapper');
-
       if (type === 'caminata') {
-        btnWalk.className = 'py-3 rounded-xl font-black text-xs border-2 bg-[#08336E] text-white border-[#08336E]';
-        btnMeet.className = 'py-3 rounded-xl font-black text-xs border-2 bg-gray-50 text-gray-600 border-gray-200';
+        bWalk.className = 'py-3 rounded-xl font-black text-xs border-2 bg-[#08336E] text-white border-[#08336E]';
+        bMeet.className = 'py-3 rounded-xl font-black text-xs border-2 bg-gray-50 text-gray-600 border-gray-200';
         inpHost.classList.add('hidden');
         walkSteps.classList.remove('hidden');
-        inpLocation.placeholder = '¿Dónde inicia el punto de recorrido? *';
       } else {
-        btnMeet.className = 'py-3 rounded-xl font-black text-xs border-2 bg-[#E90C63] text-white border-[#E90C63]';
-        btnWalk.className = 'py-3 rounded-xl font-black text-xs border-2 bg-gray-50 text-gray-600 border-gray-200';
+        bMeet.className = 'py-3 rounded-xl font-black text-xs border-2 bg-[#E90C63] text-white border-[#E90C63]';
+        bWalk.className = 'py-3 rounded-xl font-black text-xs border-2 bg-gray-50 text-gray-600 border-gray-200';
         inpHost.classList.remove('hidden');
         walkSteps.classList.add('hidden');
-        inpLocation.placeholder = '¿Dónde va a ser la reunión? *';
       }
     };
 
-    // Mapa del editor
     function initAdminMap() {
       const container = document.getElementById('adminMapCanvas');
       if (!container || !window.L) return;
       if (!adminMap) {
-        if (container._leaflet_id) {
-          container._leaflet_id = null;
-        }
+        if (container._leaflet_id) container._leaflet_id = null;
         adminMap = L.map(container).setView([21.5085, -104.8935], 14);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(adminMap);
         adminMap.on('click', (e) => {
-          const { lat, lng } = e.latlng;
-          adminRoutePoints.push({
-            lat: Number(lat.toFixed(5)),
-            lng: Number(lng.toFixed(5)),
-            label: `Punto ${adminRoutePoints.length + 1}`
-          });
+          adminRoutePoints.push({ lat: Number(e.latlng.lat.toFixed(5)), lng: Number(e.latlng.lng.toFixed(5)), label: `Punto ${adminRoutePoints.length + 1}` });
           drawAdminMapMarkers();
         });
       }
@@ -680,30 +586,20 @@
 
     function drawAdminMapMarkers() {
       if (!adminMap) return;
-      adminMap.eachLayer((layer) => {
-        if (layer instanceof L.Marker || layer instanceof L.Polyline) {
-          adminMap.removeLayer(layer);
-        }
-      });
+      adminMap.eachLayer(l => { if (l instanceof L.Marker || l instanceof L.Polyline) adminMap.removeLayer(l); });
       document.getElementById('pointsCount').textContent = adminRoutePoints.length;
       const latLngs = adminRoutePoints.map(p => [p.lat, p.lng]);
-      if (latLngs.length > 1) {
-        L.polyline(latLngs, { color: '#E90C63', weight: 5 }).addTo(adminMap);
-      }
-      adminRoutePoints.forEach((pt) => {
-        L.marker([pt.lat, pt.lng]).addTo(adminMap);
-      });
+      if (latLngs.length > 1) L.polyline(latLngs, { color: '#E90C63', weight: 5 }).addTo(adminMap);
+      adminRoutePoints.forEach(pt => L.marker([pt.lat, pt.lng]).addTo(adminMap));
     }
 
-    window.clearAdminMapPoints = () => {
-      adminRoutePoints = [];
-      drawAdminMapMarkers();
-    };
+    window.clearAdminMapPoints = () => { adminRoutePoints = []; drawAdminMapMarkers(); };
 
-    // Guardar nueva caminata o reunión
     window.saveActivity = async (e) => {
       e.preventDefault();
-      const newObj = {
+      if (!currentUser || currentUserRole === 'viewer') return;
+      const ref = collection(db, 'artifacts', appId, 'public', 'data', 'agenda_events');
+      await addDoc(ref, {
         date: selectedDate,
         type: currentActivityType,
         timeStart: document.getElementById('inpTime').value,
@@ -715,289 +611,163 @@
         steps: document.getElementById('inpSteps').value.split('\n').filter(s => s.trim() !== ''),
         requirements: document.getElementById('inpReqs').value.split('\n').filter(r => r.trim() !== ''),
         routePoints: adminRoutePoints.length > 0 ? adminRoutePoints : [{ lat: 21.5055, lng: -104.8945, label: 'Ubicación' }]
-      };
-
-      if (db && currentUser) {
-        const eventsRef = collection(db, 'artifacts', appId, 'public', 'data', 'agenda_events');
-        await addDoc(eventsRef, newObj);
-      } else {
-        allEvents.push({ id: 'local-' + Date.now(), ...newObj });
-      }
-
+      });
       document.getElementById('inpTitle').value = '';
       document.getElementById('inpLocation').value = '';
-      document.getElementById('inpSteps').value = '';
-      document.getElementById('inpReqs').value = '';
       const alertBox = document.getElementById('saveAlert');
       alertBox.classList.remove('hidden');
       setTimeout(() => alertBox.classList.add('hidden'), 3500);
-      renderAll();
     };
 
     window.deleteActivity = async (id) => {
-      if (db && currentUser && !String(id).startsWith('demo-') && !String(id).startsWith('local-')) {
-        await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'agenda_events', id));
-      } else {
-        allEvents = allEvents.filter(ev => ev.id !== id);
-        renderAll();
-      }
+      if (!currentUser || currentUserRole === 'viewer') return;
+      await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'agenda_events', id));
     };
 
-    // Renderizar toda la interfaz pública y los mapas de cada caminata
     function renderAll() {
-      // Limpiar mapas previos para evitar el error "Map container is already initialized"
-      if (renderMapTimer) {
-        clearTimeout(renderMapTimer);
-        renderMapTimer = null;
-      }
-      publicWalkMaps.forEach((m) => {
-        try {
-          m.remove();
-        } catch (err) {}
-      });
-      publicWalkMaps = [];
+      // Limpiar mapas anteriores para evitar saltos o duplicados
+      publicMapsInstances.forEach(m => { try { m.remove(); } catch(e) {} });
+      publicMapsInstances = [];
 
       const dateText = formatSimpleDate(selectedDate);
       document.getElementById('currentDateLabel').textContent = dateText;
       const admDate = document.getElementById('adminDateLabel');
       if (admDate) admDate.textContent = dateText;
 
-      // Etiqueta de HOY
       const badgeBox = document.getElementById('todayBadgeContainer');
       if (selectedDate === getTodayStr()) {
-        badgeBox.innerHTML = `<span class="inline-block px-3 py-0.5 rounded-full bg-[#E90C63] text-white font-black text-[11px] uppercase tracking-wider">📍 HOY</span>`;
+        badgeBox.innerHTML = `<span class="inline-block px-3 py-0.5 rounded-full bg-[#E90C63] text-white font-black text-[11px] uppercase">📍 HOY</span>`;
       } else {
-        badgeBox.innerHTML = `<button onclick="goToday()" class="inline-block px-3 py-0.5 rounded-full bg-[#00A4E4]/20 text-[#08336E] font-bold text-[11px] underline">Volver a Hoy</button>`;
+        badgeBox.innerHTML = `<button onclick="selectedDate='${getTodayStr()}';renderAll();" class="inline-block px-3 py-0.5 rounded-full bg-[#00A4E4]/20 text-[#08336E] font-bold text-[11px] underline">Volver a Hoy</button>`;
       }
 
-      const dayEvents = allEvents
-        .filter(e => e.date === selectedDate)
-        .sort((a, b) => (a.timeStart || '').localeCompare(b.timeStart || ''));
-
+      const dayEvents = allEvents.filter(e => e.date === selectedDate).sort((a,b)=>(a.timeStart||'').localeCompare(b.timeStart||''));
       const walks = dayEvents.filter(e => e.type === 'caminata');
       const meetings = dayEvents.filter(e => e.type === 'reunion');
-
       const container = document.getElementById('eventsContainer');
 
       if (dayEvents.length === 0) {
         container.innerHTML = `
-          <div class="bg-white rounded-3xl p-8 text-center shadow border border-gray-200">
+          <div class="bg-white rounded-3xl p-8 text-center shadow border">
             <h3 class="text-lg font-black text-[#08336E]">No hay actividades programadas en esta fecha</h3>
-            <p class="text-xs sm:text-sm text-gray-500 mt-1">
-              Usa los botones de <strong>Día Atrás</strong> o <strong>Día Adelante</strong> para revisar otras fechas.
-            </p>
+            <p class="text-xs text-gray-500 mt-1">Usa los botones de Día Atrás o Día Adelante.</p>
           </div>
         `;
       } else {
         let html = '';
-
-        // 1. CAMINATAS
         if (walks.length > 0) {
-          html += `
-            <div class="space-y-4">
-              <div class="flex items-center gap-2 px-1">
-                <div class="p-2 rounded-xl bg-[#00A4E4] text-white font-black">👣</div>
-                <h3 class="text-lg sm:text-xl font-black uppercase text-[#08336E]">
-                  1. Recorridos y Caminatas (${walks.length})
-                </h3>
-              </div>
-          `;
-
+          html += `<div class="space-y-4"><div class="flex items-center gap-2"><div class="p-2 rounded-xl bg-[#00A4E4] text-white font-black">👣</div><h3 class="text-lg font-black uppercase text-[#08336E]">Recorridos y Caminatas</h3></div>`;
           walks.forEach((walk, idx) => {
             const mapId = `walk-map-${idx}`;
-            const stepsHtml = (walk.steps || []).map((st, i) => `
-              <div class="flex items-start gap-2.5 text-sm">
-                <span class="w-6 h-6 rounded-full bg-[#08336E] text-white font-black text-xs flex items-center justify-center shrink-0">${i + 1}</span>
-                <span class="font-semibold text-[#08336E] pt-0.5">${st}</span>
-              </div>
-            `).join('');
-
+            const stepsHtml = (walk.steps || []).map((s, i) => `<div class="flex items-start gap-2.5 text-sm"><span class="w-6 h-6 rounded-full bg-[#08336E] text-white font-black text-xs flex items-center justify-center shrink-0">${i+1}</span><span class="font-semibold text-[#08336E]">${s}</span></div>`).join('');
+            
             html += `
               <div class="bg-white rounded-3xl shadow-md border-2 border-[#00A4E4] overflow-hidden">
                 <div class="bg-[#08336E] text-white px-5 py-3.5 flex items-center justify-between">
-                  <span class="font-black text-base sm:text-lg">🕒 ${walk.timeStart}</span>
+                  <span class="font-black text-base">🕒 ${walk.timeStart}</span>
                   <span class="px-3 py-1 rounded-full bg-[#00A4E4] text-white font-black text-xs uppercase">Caminata</span>
                 </div>
                 <div class="p-5 space-y-4">
                   <div>
                     <h4 class="text-xl font-black text-[#08336E]">${walk.title}</h4>
                     <div class="mt-2 p-3 rounded-2xl bg-[#E90C63]/10 border border-[#E90C63]/30">
-                      <span class="text-[11px] font-black uppercase text-[#E90C63] block">📍 PUNTO DE INICIO DE LA CAMINATA:</span>
+                      <span class="text-[11px] font-black uppercase text-[#E90C63] block">📍 PUNTO DE INICIO:</span>
                       <span class="text-sm sm:text-base font-black text-[#08336E]">${walk.locationName}</span>
                     </div>
                   </div>
-
-                  ${stepsHtml ? `
-                    <div class="bg-[#F4F9FD] p-4 rounded-2xl border border-[#08336E]/10 space-y-2.5">
-                      <span class="text-xs font-black uppercase text-[#08336E] block">👣 Ruta paso a paso (Por dónde vamos a caminar):</span>
-                      <div class="space-y-2">${stepsHtml}</div>
-                    </div>
-                  ` : ''}
-
-                  ${walk.responsible ? `
-                    <div class="flex items-center justify-between bg-gray-50 px-4 py-2.5 rounded-2xl text-xs sm:text-sm">
-                      <div>
-                        <span class="text-gray-500 font-bold">Responsable: </span>
-                        <strong class="text-[#08336E]">${walk.responsible}</strong>
-                      </div>
-                      ${walk.responsiblePhone ? `
-                        <a href="tel:${walk.responsiblePhone}" class="px-3 py-1 rounded-xl bg-[#00A4E4]/15 text-[#08336E] font-black">📞 Llamar</a>
-                      ` : ''}
-                    </div>
-                  ` : ''}
-
+                  ${stepsHtml ? `<div class="bg-[#F4F9FD] p-4 rounded-2xl border space-y-2"><span class="text-xs font-black uppercase text-[#08336E] block">👣 Ruta paso a paso:</span><div class="space-y-2">${stepsHtml}</div></div>` : ''}
+                  
                   <div class="rounded-2xl overflow-hidden border-2 border-[#08336E]/15">
-                    <div class="bg-[#08336E]/5 px-3 py-1.5 text-[11px] font-black text-[#08336E]">
-                      🗺️ MAPA DEL RECORRIDO (1 = Inicio, Línea Rosa = Ruta a caminar)
-                    </div>
-                    <div id="${mapId}" class="h-56 w-full bg-gray-100"></div>
+                    <div class="bg-[#08336E]/5 px-3 py-1.5 text-[11px] font-black text-[#08336E]">🗺️ MAPA DE LA RUTA</div>
+                    <div id="${mapId}" class="h-60 w-full bg-gray-100"></div>
                   </div>
 
-                  <a href="${getGoogleMapsUrl(walk.routePoints)}" target="_blank" rel="noopener noreferrer"
-                    class="w-full py-3.5 px-4 rounded-2xl bg-[#E90C63] hover:bg-[#c80953] text-white font-black text-sm flex items-center justify-center gap-2 shadow-md transition-all">
-                    🧭 VER RUTA DE CAMINATA EN GOOGLE MAPS ↗
+                  <a href="${getGoogleMapsUrl(walk.routePoints)}" target="_blank" rel="noopener noreferrer" class="w-full py-3.5 px-4 rounded-2xl bg-[#E90C63] text-white font-black text-sm flex items-center justify-center gap-2 shadow-md">
+                    🧭 ABRIR RUTA EN GOOGLE MAPS ↗
                   </a>
                 </div>
               </div>
             `;
           });
-
           html += `</div>`;
         }
 
-        // 2. REUNIONES
         if (meetings.length > 0) {
-          html += `
-            <div class="space-y-4">
-              <div class="flex items-center gap-2 px-1">
-                <div class="p-2 rounded-xl bg-[#E90C63] text-white font-black">👥</div>
-                <h3 class="text-lg sm:text-xl font-black uppercase text-[#08336E]">
-                  2. Reuniones del Día (${meetings.length})
-                </h3>
-              </div>
-          `;
-
-          meetings.forEach((meet) => {
-            const reqsHtml = (meet.requirements || []).map(r => `
-              <li class="text-xs sm:text-sm font-bold text-[#08336E] flex items-center gap-2">
-                <span class="w-2 h-2 rounded-full bg-[#E90C63] shrink-0"></span> ${r}
-              </li>
-            `).join('');
-
+          html += `<div class="space-y-4"><div class="flex items-center gap-2"><div class="p-2 rounded-xl bg-[#E90C63] text-white font-black">👥</div><h3 class="text-lg font-black uppercase text-[#08336E]">Reuniones del Día</h3></div>`;
+          meetings.forEach(meet => {
+            const reqsHtml = (meet.requirements || []).map(r => `<li class="text-xs font-bold text-[#08336E] flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-[#E90C63]"></span>${r}</li>`).join('');
             html += `
               <div class="bg-white rounded-3xl shadow-md border-2 border-[#E90C63] overflow-hidden">
                 <div class="bg-[#E90C63] text-white px-5 py-3.5 flex items-center justify-between">
-                  <span class="font-black text-base sm:text-lg">🕒 ${meet.timeStart}</span>
+                  <span class="font-black text-base">🕒 ${meet.timeStart}</span>
                   <span class="px-3 py-1 rounded-full bg-white text-[#E90C63] font-black text-xs uppercase">Reunión</span>
                 </div>
                 <div class="p-5 space-y-4">
                   <h4 class="text-xl font-black text-[#08336E]">${meet.title}</h4>
-
-                  <div class="grid grid-cols-1 gap-2.5 bg-[#F4F9FD] p-4 rounded-2xl border border-[#08336E]/10">
-                    <div>
-                      <span class="text-[11px] font-black uppercase text-gray-500 block">📍 ¿DÓNDE VA A SER LA REUNIÓN?</span>
-                      <span class="text-sm sm:text-base font-black text-[#08336E]">${meet.locationName}</span>
-                    </div>
-                    <div class="border-t border-gray-200 pt-2.5">
-                      <span class="text-[11px] font-black uppercase text-gray-500 block">👤 ¿QUIÉN ES EL ANFITRIÓN?</span>
-                      <span class="text-sm sm:text-base font-black text-[#08336E]">${meet.host || 'Por confirmar'}</span>
-                    </div>
-                    <div class="border-t border-gray-200 pt-2.5 flex items-center justify-between gap-2">
-                      <div>
-                        <span class="text-[11px] font-black uppercase text-gray-500 block">✅ ¿QUIÉN ES EL RESPONSABLE DE LA REUNIÓN?</span>
-                        <span class="text-sm sm:text-base font-black text-[#08336E]">${meet.responsible || 'Coordinación'}</span>
-                      </div>
-                      ${meet.responsiblePhone ? `
-                        <a href="tel:${meet.responsiblePhone}" class="px-3 py-1.5 rounded-xl bg-[#08336E] text-white font-bold text-xs shrink-0">📞 Llamar</a>
-                      ` : ''}
+                  <div class="grid grid-cols-1 gap-2.5 bg-[#F4F9FD] p-4 rounded-2xl border">
+                    <div><span class="text-[11px] font-black uppercase text-gray-500 block">📍 LUGAR:</span><span class="text-sm font-black text-[#08336E]">${meet.locationName}</span></div>
+                    <div class="border-t pt-2"><span class="text-[11px] font-black uppercase text-gray-500 block">👤 ANFITRIÓN:</span><span class="text-sm font-black text-[#08336E]">${meet.host || 'Por confirmar'}</span></div>
+                    <div class="border-t pt-2 flex items-center justify-between">
+                      <div><span class="text-[11px] font-black uppercase text-gray-500 block">✅ RESPONSABLE:</span><span class="text-sm font-black text-[#08336E]">${meet.responsible || 'Coordinación'}</span></div>
+                      ${meet.responsiblePhone ? `<a href="tel:${meet.responsiblePhone}" class="px-3 py-1 bg-[#08336E] text-white font-bold text-xs rounded-xl">📞 Llamar</a>` : ''}
                     </div>
                   </div>
-
-                  ${reqsHtml ? `
-                    <div class="bg-amber-50/80 border border-amber-200 p-4 rounded-2xl space-y-2">
-                      <span class="text-xs font-black uppercase text-[#E90C63] block">☑️ Requerimientos que necesita esta reunión:</span>
-                      <ul class="grid grid-cols-1 sm:grid-cols-2 gap-1.5">${reqsHtml}</ul>
-                    </div>
-                  ` : ''}
-
-                  <a href="${getGoogleMapsUrl(meet.routePoints)}" target="_blank" rel="noopener noreferrer"
-                    class="w-full py-3.5 px-4 rounded-2xl bg-[#08336E] hover:bg-[#05234d] text-white font-black text-sm flex items-center justify-center gap-2 shadow-md transition-all">
-                    📍 ABRIR UBICACIÓN DE LA REUNIÓN EN GOOGLE MAPS ↗
+                  ${reqsHtml ? `<div class="bg-amber-50 border p-4 rounded-2xl space-y-1"><span class="text-xs font-black uppercase text-[#E90C63] block">☑️ Requerimientos:</span><ul class="grid grid-cols-2 gap-1">${reqsHtml}</ul></div>` : ''}
+                  <a href="${getGoogleMapsUrl(meet.routePoints)}" target="_blank" rel="noopener noreferrer" class="w-full py-3.5 px-4 rounded-2xl bg-[#08336E] text-white font-black text-sm flex items-center justify-center gap-2 shadow-md">
+                    📍 VER UBICACIÓN EN GOOGLE MAPS ↗
                   </a>
                 </div>
               </div>
             `;
           });
-
           html += `</div>`;
         }
-
         container.innerHTML = html;
 
-        // Inicializar cada mapa de caminata de forma segura
-        renderMapTimer = setTimeout(() => {
+        // Renderizar mapas públicos con retraso controlado para evitar "brinco"
+        setTimeout(() => {
           walks.forEach((walk, idx) => {
             const el = document.getElementById(`walk-map-${idx}`);
             const pts = walk.routePoints || [];
             if (!el || pts.length === 0 || !window.L) return;
-
-            // Si el contenedor ya tenía un mapa inicializado, limpiamos su ID interno
-            if (el._leaflet_id) {
-              el._leaflet_id = null;
-              el.innerHTML = '';
-            }
+            if (el._leaflet_id) el._leaflet_id = null;
+            el.innerHTML = '';
 
             const map = L.map(el, { scrollWheelZoom: false }).setView([pts[0].lat, pts[0].lng], 15);
-            publicWalkMaps.push(map);
+            publicMapsInstances.push(map);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
             const latLngs = pts.map(p => [Number(p.lat), Number(p.lng)]);
-            if (latLngs.length > 1) {
-              L.polyline(latLngs, { color: '#E90C63', weight: 6, dashArray: '8, 6' }).addTo(map);
-            }
+            if (latLngs.length > 1) L.polyline(latLngs, { color: '#E90C63', weight: 6, dashArray: '8, 6' }).addTo(map);
+
             pts.forEach((pt, i) => {
               const color = i === 0 ? '#08336E' : i === pts.length - 1 ? '#E90C63' : '#00A4E4';
               const icon = L.divIcon({
                 className: 'pin',
-                html: `<div style="background:${color};color:white;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:12px;border:2px solid white;box-shadow:0 2px 5px rgba(0,0,0,0.4);">${i + 1}</div>`,
+                html: `<div style="background:${color};color:white;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:12px;border:2px solid white;box-shadow:0 2px 5px rgba(0,0,0,0.4);">${i+1}</div>`,
                 iconSize: [26, 26],
                 iconAnchor: [13, 13]
               });
-              L.marker([Number(pt.lat), Number(pt.lng)], { icon })
-                .bindPopup(`<b>${pt.label || 'Punto ' + (i + 1)}</b>`)
-                .addTo(map);
+              L.marker([Number(pt.lat), Number(pt.lng)], { icon }).addTo(map);
             });
             if (latLngs.length > 1) map.fitBounds(latLngs, { padding: [30, 30] });
+            map.invalidateSize();
           });
-        }, 100);
+        }, 150);
       }
 
-      // Renderizar lista en el panel de administración
+      // Lista admin
       const adminList = document.getElementById('adminEventsList');
       if (adminList) {
-        if (dayEvents.length === 0) {
-          adminList.innerHTML = `<p class="text-xs text-gray-400">Sin actividades en esta fecha.</p>`;
-        } else {
-          adminList.innerHTML = dayEvents.map(ev => `
-            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl border">
-              <div>
-                <span class="text-xs font-black text-[#E90C63] mr-2">${ev.timeStart}</span>
-                <strong class="text-sm">${ev.title}</strong>
-              </div>
-              <button onclick="deleteActivity('${ev.id}')" class="text-red-600 hover:bg-red-50 px-3 py-1.5 rounded-lg text-xs font-bold">
-                🗑 Eliminar
-              </button>
-            </div>
-          `).join('');
-        }
+        adminList.innerHTML = dayEvents.length === 0 ? `<p class="text-xs text-gray-400">Sin actividades.</p>` : dayEvents.map(ev => `
+          <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl border text-xs">
+            <div><strong class="text-[#E90C63] mr-2">${ev.timeStart}</strong><span>${ev.title}</span></div>
+            ${currentUserRole !== 'viewer' ? `<button onclick="deleteActivity('${ev.id}')" class="text-red-600 font-bold hover:underline">Eliminar</button>` : ''}
+          </div>
+        `).join('');
       }
-
       if (window.lucide) window.lucide.createIcons();
     }
-
-    window.addEventListener('DOMContentLoaded', () => {
-      renderAll();
-    });
   </script>
 </body>
 </html>
