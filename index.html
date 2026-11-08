@@ -113,23 +113,64 @@
         <button onclick="loginWithGoogle()" class="px-6 py-3.5 rounded-2xl bg-[#08336E] hover:bg-[#05234d] text-white font-black text-sm flex items-center justify-center gap-2 shadow-md">
           Iniciar Sesión con Google
         </button>
-        <button onclick="unlockDemoEditor()" class="px-5 py-3.5 rounded-2xl bg-gray-100 hover:bg-gray-200 text-[#08336E] font-bold text-xs">
-          Entrar en Modo Prueba Directo
+        <button id="demoBtn" onclick="unlockDemoEditor()" class="px-5 py-3.5 rounded-2xl bg-gray-100 hover:bg-gray-200 text-[#08336E] font-bold text-xs">
+          Probar vista Master (Modo Local)
         </button>
       </div>
       <p id="loginErrorMsg" class="text-xs font-bold text-red-600 hidden"></p>
     </div>
 
-    <!-- Panel Editor (Visible cuando ya inició sesión) -->
+    <!-- Panel Editor (Visible cuando ya inició sesión con Google) -->
     <div id="editorFormBox" class="hidden space-y-6">
       <div class="bg-[#08336E] text-white p-4 rounded-2xl flex flex-wrap items-center justify-between gap-2">
         <div>
-          <span class="text-[11px] font-black uppercase text-[#00A4E4]" id="loggedEmailLabel">MODO ADMINISTRADORA</span>
-          <h2 class="text-lg font-black">Alimentar Agenda Diaria</h2>
+          <span class="text-[11px] font-black uppercase text-[#00A4E4]" id="loggedEmailLabel">MODO ADMINISTRADOR</span>
+          <h2 class="text-lg font-black">Panel de Control de Agenda</h2>
         </div>
-        <button onclick="switchView('public')" class="px-4 py-2 rounded-xl bg-[#E90C63] text-white font-black text-xs">
-          Ver Página Pública
-        </button>
+        <div class="flex items-center gap-2">
+          <button onclick="logoutGoogle()" class="px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs">
+            Cerrar sesión
+          </button>
+          <button onclick="switchView('public')" class="px-4 py-2 rounded-xl bg-[#E90C63] text-white font-black text-xs">
+            Ver Página Pública
+          </button>
+        </div>
+      </div>
+
+      <!-- =========================================================
+           EXCLUSIVO PARA TI (luixnay@gmail.com): GESTIÓN DE ACCESOS
+           Los editores normales NUNCA verán este bloque
+      ========================================================== -->
+      <div id="masterAccessBox" class="hidden bg-white p-5 rounded-3xl shadow-md border-2 border-[#E90C63] space-y-4">
+        <div class="flex items-center justify-between">
+          <div>
+            <span class="px-2.5 py-0.5 rounded-full bg-[#E90C63] text-white font-black text-[10px] uppercase">
+              👑 EXCLUSIVO MASTER (luixnay@gmail.com)
+            </span>
+            <h3 class="font-black text-base text-[#08336E] mt-1">
+              Control de Permisos con Cuenta de Google
+            </h3>
+            <p class="text-xs text-gray-500">
+              Solo tú puedes ver este cuadro y decidir quién puede editar la agenda.
+            </p>
+          </div>
+        </div>
+
+        <form onsubmit="addAuthorizedUser(event)" class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-1">
+          <input id="newAuthEmail" type="email" required placeholder="correo@gmail.com" class="px-3.5 py-2.5 rounded-xl border font-bold text-xs sm:text-sm" />
+          <select id="newAuthRole" class="px-3.5 py-2.5 rounded-xl border font-bold text-xs sm:text-sm bg-white">
+            <option value="editor">✏️ Editor de Agenda (Puede subir caminatas/reuniones)</option>
+            <option value="viewer">👁️ Solo Visualizador (Sin permiso de editar)</option>
+          </select>
+          <button type="submit" class="py-2.5 px-4 rounded-xl bg-[#08336E] hover:bg-[#05234d] text-white font-black text-xs shadow">
+            + Dar Acceso Google
+          </button>
+        </form>
+
+        <div class="space-y-2 pt-2">
+          <span class="text-[11px] font-black uppercase text-gray-500 block">Cuentas registradas y su nivel de acceso:</span>
+          <div id="authorizedUsersList" class="space-y-2"></div>
+        </div>
       </div>
 
       <!-- Selector de Fecha en el Editor -->
@@ -229,37 +270,35 @@
       signInWithCustomToken, 
       onAuthStateChanged,
       GoogleAuthProvider,
-      signInWithPopup
+      signInWithPopup,
+      signOut
     } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
     import { 
       getFirestore, 
       collection, 
       doc, 
+      setDoc,
       addDoc, 
       deleteDoc, 
       onSnapshot 
     } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
     // =========================================================================
-    // PASO IMPORTANTE PARA TU DOMINIO agendaivi.online:
-    // Cuando crees tu Firebase propio, pega aquí tus datos de firebaseConfig
-    // y abajo en AUTHORIZED_EMAILS pon los correos de Google de tu equipo.
+    // 1. ADMINISTRADOR MASTER ÚNICO (SOLO TÚ PUEDES DAR O QUITAR PERMISOS)
+    // =========================================================================
+    const MASTER_ADMIN_EMAIL = "luixnay@gmail.com";
+
+    // =========================================================================
+    // 2. TUS CREDENCIALES REALES DE FIREBASE (PROYECTO: agenda-ivi)
     // =========================================================================
     const YOUR_FIREBASE_CONFIG = {
-      apiKey: "REEMPLAZAR_CON_TU_API_KEY",
-      authDomain: "tu-proyecto.firebaseapp.com",
-      projectId: "tu-proyecto",
-      storageBucket: "tu-proyecto.appspot.com",
-      messagingSenderId: "123456789",
-      appId: "1:123456789:web:abcdef"
+      apiKey: "AIzaSyDyczgVybzvj31cpO6YreZNw9Ywi3ODFFw",
+      authDomain: "agenda-ivi.firebaseapp.com",
+      projectId: "agenda-ivi",
+      storageBucket: "agenda-ivi.firebasestorage.app",
+      messagingSenderId: "749095067521",
+      appId: "1:749095067521:web:6d0ec259403c584e465280"
     };
-
-    // Lista de correos de Google a los que les das permiso de editar:
-    const AUTHORIZED_EMAILS = [
-      "tu-correo@gmail.com",
-      "coordinador@gmail.com",
-      "ivideliza@gmail.com"
-    ];
 
     const getTodayStr = () => {
       const today = new Date();
@@ -319,12 +358,18 @@
     // Estado global
     let selectedDate = getTodayStr();
     let allEvents = [...INITIAL_EVENTS];
+    let authorizedAccounts = [
+      { email: MASTER_ADMIN_EMAIL, role: 'master' }
+    ];
     let currentActivityType = 'caminata';
     let adminRoutePoints = [{ lat: 21.5055, lng: -104.8945, label: 'Punto 1' }];
     let adminMap = null;
+    let publicWalkMaps = [];
+    let renderMapTimer = null;
     let db = null;
     let auth = null;
     let currentUser = null;
+    let currentUserRole = null; // 'master' | 'editor' | 'viewer' | null
     const appId = typeof __app_id !== 'undefined' ? __app_id : 'agenda-ivideliza';
     const isCanvasEnv = typeof __firebase_config !== 'undefined';
     const isCustomFirebaseConfigured = YOUR_FIREBASE_CONFIG.apiKey !== "REEMPLAZAR_CON_TU_API_KEY";
@@ -337,10 +382,15 @@
         auth = getAuth(app);
         db = getFirestore(app);
 
+        if (isCustomFirebaseConfigured) {
+          const demoBtn = document.getElementById('demoBtn');
+          if (demoBtn) demoBtn.classList.add('hidden');
+        }
+
         const initAuth = async () => {
           if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
             await signInWithCustomToken(auth, __initial_auth_token);
-          } else {
+          } else if (!auth.currentUser) {
             await signInAnonymously(auth);
           }
         };
@@ -349,6 +399,7 @@
         onAuthStateChanged(auth, (user) => {
           currentUser = user;
           if (user) {
+            // 1. Escuchar eventos de la agenda en tiempo real
             const eventsRef = collection(db, 'artifacts', appId, 'public', 'data', 'agenda_events');
             onSnapshot(eventsRef, async (snap) => {
               const list = snap.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -362,11 +413,134 @@
                 renderAll();
               }
             }, (err) => console.error(err));
+
+            // 2. Escuchar la lista de correos con permiso que tú administras
+            const permsRef = collection(db, 'artifacts', appId, 'public', 'data', 'agenda_permissions');
+            onSnapshot(permsRef, (snap) => {
+              const list = snap.docs.map(d => ({ email: d.id.toLowerCase(), ...d.data() }));
+              if (!list.some(u => u.email === MASTER_ADMIN_EMAIL)) {
+                list.unshift({ email: MASTER_ADMIN_EMAIL, role: 'master' });
+              }
+              authorizedAccounts = list;
+              checkCurrentGoogleUserRole(user);
+              renderAuthorizedUsersList();
+            }, (err) => console.error(err));
           }
         });
       } catch (e) {
         console.warn("Usando modo demostración local hasta configurar Firebase:", e);
       }
+    }
+
+    function checkCurrentGoogleUserRole(user) {
+      if (!user || !user.email) return;
+      const email = user.email.toLowerCase().trim();
+      if (email === MASTER_ADMIN_EMAIL) {
+        currentUserRole = 'master';
+        applyEditorPermissionsUI(email, 'master');
+        return;
+      }
+      const found = authorizedAccounts.find(acc => acc.email.toLowerCase() === email);
+      if (found && found.role === 'editor') {
+        currentUserRole = 'editor';
+        applyEditorPermissionsUI(email, 'editor');
+      } else if (found && found.role === 'viewer') {
+        currentUserRole = 'viewer';
+        showLoginError(`Hola ${email}: Tu cuenta está registrada como Solo Visualizador. Puedes ver toda la agenda pública pero no modificarla.`);
+      } else {
+        currentUserRole = null;
+        showLoginError(`El correo ${email} no tiene permiso para editar. Solicita acceso al Administrador Master (${MASTER_ADMIN_EMAIL}).`);
+      }
+    }
+
+    function showLoginError(text) {
+      document.getElementById('googleLoginBox').classList.remove('hidden');
+      document.getElementById('editorFormBox').classList.add('hidden');
+      const msg = document.getElementById('loginErrorMsg');
+      msg.textContent = text;
+      msg.classList.remove('hidden');
+    }
+
+    function applyEditorPermissionsUI(email, role) {
+      document.getElementById('googleLoginBox').classList.add('hidden');
+      document.getElementById('editorFormBox').classList.remove('hidden');
+      const masterBox = document.getElementById('masterAccessBox');
+
+      if (role === 'master') {
+        document.getElementById('loggedEmailLabel').textContent = `👑 ADMIN MASTER: ${email}`;
+        masterBox.classList.remove('hidden');
+      } else {
+        document.getElementById('loggedEmailLabel').textContent = `✏️ EDITOR AUTORIZADO: ${email}`;
+        masterBox.classList.add('hidden');
+      }
+      renderAuthorizedUsersList();
+      setTimeout(initAdminMap, 200);
+    }
+
+    // Agregar o modificar un correo autorizado (Solo Master luixnay@gmail.com)
+    window.addAuthorizedUser = async (e) => {
+      e.preventDefault();
+      if (currentUserRole !== 'master') return;
+      const emailInput = document.getElementById('newAuthEmail');
+      const roleInput = document.getElementById('newAuthRole');
+      const email = emailInput.value.toLowerCase().trim();
+      const role = roleInput.value;
+
+      if (!email || email === MASTER_ADMIN_EMAIL) return;
+
+      if (db && currentUser) {
+        const userDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'agenda_permissions', email);
+        await setDoc(userDocRef, {
+          email,
+          role,
+          updatedBy: MASTER_ADMIN_EMAIL,
+          updatedAt: new Date().toISOString()
+        });
+      } else {
+        authorizedAccounts = authorizedAccounts.filter(a => a.email !== email);
+        authorizedAccounts.push({ email, role });
+        renderAuthorizedUsersList();
+      }
+      emailInput.value = '';
+    };
+
+    // Quitar permiso a un correo (Solo Master luixnay@gmail.com)
+    window.removeAuthorizedUser = async (email) => {
+      if (currentUserRole !== 'master' || email === MASTER_ADMIN_EMAIL) return;
+      if (db && currentUser) {
+        const userDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'agenda_permissions', email);
+        await deleteDoc(userDocRef);
+      } else {
+        authorizedAccounts = authorizedAccounts.filter(a => a.email !== email);
+        renderAuthorizedUsersList();
+      }
+    };
+
+    function renderAuthorizedUsersList() {
+      const container = document.getElementById('authorizedUsersList');
+      if (!container) return;
+      container.innerHTML = authorizedAccounts.map(acc => {
+        const isMaster = acc.email.toLowerCase() === MASTER_ADMIN_EMAIL;
+        const badge = isMaster
+          ? `<span class="px-2.5 py-0.5 rounded-full bg-[#E90C63] text-white font-black text-[10px]">👑 ADMIN MASTER</span>`
+          : acc.role === 'editor'
+            ? `<span class="px-2.5 py-0.5 rounded-full bg-[#00A4E4]/20 text-[#08336E] font-black text-[10px]">✏️ EDITOR DE AGENDA</span>`
+            : `<span class="px-2.5 py-0.5 rounded-full bg-gray-200 text-gray-700 font-bold text-[10px]">👁️ VISUALIZADOR</span>`;
+
+        return `
+          <div class="flex items-center justify-between p-2.5 rounded-xl bg-[#F4F9FD] border border-[#08336E]/10 text-xs">
+            <div class="flex flex-wrap items-center gap-2">
+              <strong class="text-[#08336E]">${acc.email}</strong>
+              ${badge}
+            </div>
+            ${!isMaster ? `
+              <button onclick="removeAuthorizedUser('${acc.email}')" class="text-red-600 hover:bg-red-50 px-2.5 py-1 rounded-lg font-bold">
+                Quitar acceso
+              </button>
+            ` : `<span class="text-[10px] font-bold text-gray-400">Control Total</span>`}
+          </div>
+        `;
+      }).join('');
     }
 
     // Formatear fecha en español
@@ -429,32 +603,32 @@
 
     // Iniciar sesión con Google para editar
     window.loginWithGoogle = async () => {
-      if (!auth) {
+      if (!auth || !isCustomFirebaseConfigured) {
         unlockDemoEditor();
         return;
       }
       try {
         const provider = new GoogleAuthProvider();
         const result = await signInWithPopup(auth, provider);
-        const email = (result.user.email || '').toLowerCase();
-        const allowed = AUTHORIZED_EMAILS.map(e => e.toLowerCase());
-        if (allowed.includes(email) || !isCustomFirebaseConfigured) {
-          document.getElementById('loggedEmailLabel').textContent = `EDITOR: ${email}`;
-          unlockDemoEditor();
-        } else {
-          const msg = document.getElementById('loginErrorMsg');
-          msg.textContent = `El correo ${email} no está en la lista de autorizados.`;
-          msg.classList.remove('hidden');
-        }
+        checkCurrentGoogleUserRole(result.user);
       } catch (err) {
-        unlockDemoEditor();
+        showLoginError("No se pudo iniciar sesión con Google. Verifica que tu dominio esté autorizado en Firebase.");
       }
     };
 
+    window.logoutGoogle = async () => {
+      if (auth && isCustomFirebaseConfigured) {
+        await signOut(auth);
+        await signInAnonymously(auth);
+      }
+      currentUserRole = null;
+      document.getElementById('editorFormBox').classList.add('hidden');
+      document.getElementById('googleLoginBox').classList.remove('hidden');
+    };
+
     window.unlockDemoEditor = () => {
-      document.getElementById('googleLoginBox').classList.add('hidden');
-      document.getElementById('editorFormBox').classList.remove('hidden');
-      setTimeout(initAdminMap, 200);
+      currentUserRole = 'master';
+      applyEditorPermissionsUI(MASTER_ADMIN_EMAIL, 'master');
     };
 
     window.setActivityType = (type) => {
@@ -485,6 +659,9 @@
       const container = document.getElementById('adminMapCanvas');
       if (!container || !window.L) return;
       if (!adminMap) {
+        if (container._leaflet_id) {
+          container._leaflet_id = null;
+        }
         adminMap = L.map(container).setView([21.5085, -104.8935], 14);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(adminMap);
         adminMap.on('click', (e) => {
@@ -568,6 +745,18 @@
 
     // Renderizar toda la interfaz pública y los mapas de cada caminata
     function renderAll() {
+      // Limpiar mapas previos para evitar el error "Map container is already initialized"
+      if (renderMapTimer) {
+        clearTimeout(renderMapTimer);
+        renderMapTimer = null;
+      }
+      publicWalkMaps.forEach((m) => {
+        try {
+          m.remove();
+        } catch (err) {}
+      });
+      publicWalkMaps = [];
+
       const dateText = formatSimpleDate(selectedDate);
       document.getElementById('currentDateLabel').textContent = dateText;
       const admDate = document.getElementById('adminDateLabel');
@@ -745,14 +934,21 @@
 
         container.innerHTML = html;
 
-        // Inicializar cada mapa de caminata
-        setTimeout(() => {
+        // Inicializar cada mapa de caminata de forma segura
+        renderMapTimer = setTimeout(() => {
           walks.forEach((walk, idx) => {
             const el = document.getElementById(`walk-map-${idx}`);
             const pts = walk.routePoints || [];
             if (!el || pts.length === 0 || !window.L) return;
 
+            // Si el contenedor ya tenía un mapa inicializado, limpiamos su ID interno
+            if (el._leaflet_id) {
+              el._leaflet_id = null;
+              el.innerHTML = '';
+            }
+
             const map = L.map(el, { scrollWheelZoom: false }).setView([pts[0].lat, pts[0].lng], 15);
+            publicWalkMaps.push(map);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
             const latLngs = pts.map(p => [Number(p.lat), Number(p.lng)]);
